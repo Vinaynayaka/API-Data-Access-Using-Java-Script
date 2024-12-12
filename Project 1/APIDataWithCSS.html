@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        p {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        #Load {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #Load:hover {
+            background-color: #0056b3;
+        }
+
+        #postsData {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 10px;
+        }
+
+        #postsData div {
+            background-color: #fff;
+            margin-bottom: 15px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        #postsData h3 {
+            margin: 0 0 10px;
+            color: #007BFF;
+        }
+
+        #postsData p {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Fetch Posts</h1>
+    <p>Click the Button below to see posts</p>
+    <div id="postsData"></div>
+    <button id="Load">Load</button>
+    <script>
+        document.getElementById("Load").addEventListener("click", function() {
+            loadPosts();
+        });
+
+        function loadPosts() {
+            const url = "https://jsonplaceholder.typicode.com/posts";
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('User not found');
+                    }
+                    return response.json();
+                })
+                .then(posts => {
+                    console.log(posts);
+                    displayPosts(posts);
+                })
+                .catch(error => {
+                    console.log("Error fetching posts: ", error);
+                });
+        }
+
+        function displayPosts(posts) {
+            const postsData = document.getElementById('postsData');
+            postsData.innerHTML = ''; // Clear existing content
+
+            posts.forEach(post => {
+                const postDiv = document.createElement('div');
+                
+                const postId = document.createElement('h3');
+                postId.textContent = `Post #${post.id}`;
+                postDiv.appendChild(postId);
+
+                const postTitle = document.createElement('p');
+                postTitle.textContent = post.title;
+                postDiv.appendChild(postTitle);
+
+                postsData.appendChild(postDiv);
+            });
+        }
+    </script>
+</body>
+</html>

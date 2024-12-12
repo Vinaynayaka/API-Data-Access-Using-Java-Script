@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Profile Viewer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #000000;
+            margin: 0;
+            padding: 20px;
+            background-image: url('git-github.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            height: 100vh;
+        }
+        h1{
+            color: white;
+        }
+
+        .search-container {
+            margin: 20px auto;
+        }
+
+        input {
+            padding: 10px;
+            width: 300px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin-left: 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .profile-card {
+            margin: 20px auto;
+            padding: 20px;
+            max-width: 400px;
+            background: rgb(255, 255, 255,0);
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            color: white;
+        }
+
+        .profile-card img {
+            width: 100px;
+            border-radius: 50%;
+            margin-bottom: 10px;
+        }
+
+        .profile-card a {
+            color: #007BFF;
+            text-decoration: none;
+        }
+
+        .profile-card a:hover {
+            text-decoration: underline;
+        }
+
+        #repositories {
+            margin: 20px auto;
+            max-width: 400px;
+            background: rgb(255, 255, 255,0);
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            display: none;
+            color: white;
+        }
+
+        #repositories ul {
+            list-style-type: none;
+            padding: 0;
+         }
+         #repositories li {
+            margin: 5px 0;
+            color: #FFD700; /* Gold color */
+        }
+        
+        #repositories li a {
+            color: #FFD700; /* Ensure the links are the same gold color */
+            text-decoration: none;
+        }
+        
+        #repositories li a:hover {
+            text-decoration: underline;
+            color: #FF6347; /* Hover color */
+        }
+        
+    </style>
+</head>
+<body>
+    <h1>GitHub Profile Viewer</h1>
+    <div class="search-container">
+        <input type="text" id="username" placeholder="Enter GitHub username" />
+        <button id="search">Search</button>
+    </div>
+    <div id="profile"></div>
+    <div id="repositories"></div>
+
+    <script>
+        document.getElementById("search").addEventListener("click", function () {
+            const username = document.getElementById("username").value;
+            if (username) {
+                fetchGitHubProfile(username);
+            }
+        });
+
+        function fetchGitHubProfile(username) {
+            const url = `https://api.github.com/users/${username}`;
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('User not found');
+                    }
+                    return response.json();
+                })
+                .then(user => displayProfile(user))
+                .catch(error => {
+                    document.getElementById("profile").innerHTML = `<p style="color: red;">${error.message}</p>`;
+                    document.getElementById("repositories").style.display = 'none';
+                });
+        }
+
+        function displayProfile(user) {
+            console.log(user);
+            const profileContainer = document.getElementById("profile");
+            const repositoriesContainer = document.getElementById("repositories");
+            profileContainer.innerHTML = `
+                <div class="profile-card">
+                    <img src="${user.avatar_url}" alt="${user.login} profile picture" />
+                    <h2>${user.name || user.login}</h2>
+                    <p>${user.bio || "No bio available"}</p>
+                    <p><strong>Repositories:</strong> ${user.public_repos}</p>
+                    <p><strong>Followers:</strong> ${user.followers}</p>
+                    <p><strong>Following:</strong> ${user.following}</p>
+                    <p><strong>Location:</strong> ${user.location || "Not specified"}</p>
+                    <a href="${user.html_url}" target="_blank">View Profile on GitHub</a>
+                    <button id="showRepos">Show Repositories</button>
+                </div>
+            `;
+
+            repositoriesContainer.style.display = 'none'; // Hide repositories initially
+            document.getElementById("showRepos").addEventListener("click", function () {
+                fetchRepositories(user.login);
+            });
+        }
+
+        function fetchRepositories(username) {
+            const url = `https://api.github.com/users/${username}/repos`;
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Repositories not found');
+                    }
+                    return response.json();
+                })
+                .then(repos => displayRepositories(repos))
+                .catch(error => {
+                    const repositoriesContainer = document.getElementById("repositories");
+                    repositoriesContainer.innerHTML = `<p style="color: red;">${error.message}</p>`;
+                    repositoriesContainer.style.display = 'block';
+                });
+        }
+
+        function displayRepositories(repos) {
+            const repositoriesContainer = document.getElementById("repositories");
+            repositoriesContainer.style.display = 'block';
+            repositoriesContainer.innerHTML = `
+                <h3>Repositories:</h3>
+                <ul>
+                    ${repos.map(repo => `<li><a href="${repo.html_url}" target="_blank">${repo.name}</a></li>`).join('')}
+                </ul>
+            `;
+        }
+    </script>
+</body>
+</html>
